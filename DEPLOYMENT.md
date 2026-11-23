@@ -1,96 +1,104 @@
 # SkillProof — Production Deployment Guide
 
-This document details the production engineering setup, secrets sanitation, and deployment instructions for **SkillProof** to **GitHub** and **Render** (`render.com`).
+This document details the production engineering setup, PostgreSQL database migration, blockchain configuration, secrets sanitation, and deployment instructions for **SkillProof** to **GitHub** and **Render** (`render.com`).
 
 ---
 
-## 1. System Architecture & Service Topography
+## 1. System Architecture & Database Topography
 
-SkillProof is architected as a **unified full-stack Next.js 14 App Router application**:
-- **Frontend Presentation Layer:** Next.js 14 (React 18), Tailwind CSS, Three.js spatial viewport, Framer Motion, and Lucide React.
-- **Backend Service Layer:** Next.js API Routes (`/api/auth/*`, `/api/certificates/*`, `/api/issuers/*`, `/api/stats/*`) running as serverless Node.js endpoints.
-- **Data Persistence:** Prisma ORM with SQLite (embedded file database for demo) or PostgreSQL.
-- **Decentralized Verification:** Client-side Ethers.js v6 interaction with the Polygon Amoy / Sepolia smart contract registry.
+SkillProof is architected as a **unified full-stack Next.js 14 App Router application** backed by **PostgreSQL**:
+- **Application Runtime:** Next.js 14 (React 18, TypeScript, Tailwind CSS, Three.js spatial viewports).
+- **Backend Service Layer:** Next.js API Routes (`/api/auth/*`, `/api/certificates/*`, `/api/issuers/*`, `/api/stats/*`) in Node.js.
+- **Production Database:** Managed PostgreSQL database on Render.
+- **ORM & Migrations:** Prisma ORM configured with `provider = "postgresql"` and baseline migration `20261123000000_init`.
+- **Blockchain Network:** Polygon Amoy Testnet (Chain ID `80002`), interacting with smart contract `SkillProofRegistry.sol`.
 
-> **Deployment Topography:** **Single Unified Render Web Service.** No separate frontend/backend services required.
-
----
-
-## 2. Production Build Verification
-
-The application was tested and verified clean with `0` type errors and `0` linting failures:
-```bash
-npm run build
-# Executes: prisma generate && next build
-# Result: 24/24 static & dynamic pages compiled successfully.
-```
-
-- **Production Build Command:** `npm install && npx prisma generate && npm run build`
-- **Production Start Command:** `npm start` (Next.js automatically binds to Render's dynamic `$PORT`).
+> **Render Deployment Topography:** **1 Render Web Service** linked to **1 Render Managed PostgreSQL Database**.
 
 ---
 
-## 3. Secrets Sanitation & Git Hygiene
+## 2. Blockchain Network & Smart Contract Verification
 
-The following safety controls are enforced by `.gitignore`:
-- `.env` and `.env*.local` are strictly excluded from source control.
-- Embedded databases (`dev.db`, `prisma/*.db`, `*.sqlite`) are ignored.
+| Parameter | Configuration | Status |
+| :--- | :--- | :--- |
+| **Network Name** | Polygon Amoy Testnet | Configured |
+| **Chain ID** | `80002` | Verified across Hardhat & App |
+| **RPC Endpoint** | `https://rpc-amoy.polygon.technology` | Public Polygon Amoy RPC |
+| **Contract Registry** | `0x71C8F7A853245B11C194f48A141d6D33a0E821Db` | Deployed `SkillProofRegistry.sol` |
+| **Block Explorer** | `https://amoy.polygonscan.com` | Official Amoy Explorer |
+| **Fallback Engine** | Simulated Cryptographic Ledger | Integrated gracefully in `src/lib/blockchain.ts` |
+
+---
+
+## 3. Production Build & Migration Verification
+
+The production build and migration suite have been verified:
+- **Prisma Schema:** `datasource db { provider = "postgresql" }`
+- **Migration Script:** `prisma/migrations/20261123000000_init/migration.sql`
+- **Build Command:** `npm install && npx prisma migrate deploy && node prisma/seed.js && npm run build`
+- **Start Command:** `npm start` *(Next.js automatically binds to Render’s dynamic `$PORT`)*
+- **Compilation Result:** 24/24 static & dynamic routes compiled successfully with 0 type errors.
+
+---
+
+## 4. Secrets Sanitation & Git Hygiene
+
+The following safety controls are strictly active in `.gitignore`:
+- `.env`, `.env*.local`, `.env.production` are excluded from version control.
+- Local embedded databases (`dev.db`, `*.db`, `*.sqlite`) are ignored.
 - Smart contract build artifacts (`artifacts/`, `cache/`, `typechain-types/`) are excluded.
 - Private keys, `.pem`, and `.key` files are blocked from Git commits.
-- `.env.example` provides sanitized reference templates without real private keys or credentials.
+- `.env.example` provides sanitized templates with zero exposed secrets.
 
 ---
 
-## 4. GitHub Push Procedure
+## 5. GitHub Push Instructions
 
-The local repository is initialized and pre-committed on branch `main`.
+Your local Git repository is mapped to `https://github.com/Blanks30/SkillProof.git` on branch `main`.
 
-Run the following commands in your terminal:
+Run this command in your terminal:
 
 ```bash
-# 1. Navigate to the project root
-cd "C:\Users\MOHAMMED\Videos\BLOCKCHAIN MP"
-
-# 2. Link your GitHub repository
-git remote add origin https://github.com/Blanks30/SkillProof.git
-
-# 3. Ensure branch is main
-git branch -M main
-
-# 4. Push your code to GitHub
 git push -u origin main
 ```
 
-*(If you have already configured origin, use `git remote set-url origin https://github.com/Blanks30/SkillProof.git` before pushing).*
-
 ---
 
-## 5. Render Deployment Instructions
+## 6. Render Deployment Instructions
 
 ### Option A: Automatic via Render Blueprint (Recommended)
-This repository includes a [`render.yaml`](./render.yaml) specification:
-1. Go to [dashboard.render.com](https://dashboard.render.com).
+This repository includes a [`render.yaml`](./render.yaml) specification that automatically provisions both the PostgreSQL database and the Web Service:
+
+1. Log in to **[dashboard.render.com](https://dashboard.render.com)**.
 2. Click **"New +"** → **"Blueprint"**.
-3. Select your `Blanks30/SkillProof` repository.
-4. Render will automatically parse `render.yaml`, configure the Web Service, inject the environment variables, and trigger the build.
+3. Select your repository: **`Blanks30/SkillProof`**.
+4. Render will detect `render.yaml` and display:
+   - **PostgreSQL Database:** `skillproof-postgres` (Free tier)
+   - **Web Service:** `skillproof` (Free tier)
+5. Click **"Apply"**.
+6. Render provisions the database, runs `prisma migrate deploy` to create all tables, executes `prisma/seed.js` to populate initial demo data, compiles Next.js, and publishes the live site.
 
 ---
 
-### Option B: Manual Web Service Setup
-1. Log in to [render.com](https://render.com).
-2. Click **"New +"** → **"Web Service"**.
-3. Select **"Build and deploy from a Git repository"** and choose `Blanks30/SkillProof`.
-4. Fill in the deployment configuration:
-   - **Name:** `skillproof`
-   - **Region:** Closest region (e.g. *Singapore*, *Frankfurt*, or *Oregon*)
-   - **Branch:** `main`
-   - **Runtime:** `Node`
-   - **Build Command:** `npm install && npx prisma generate && npm run build`
-   - **Start Command:** `npm start`
-   - **Instance Type:** `Free`
-5. In **Environment Variables**, add:
+### Option B: Manual Setup on Render
+If setting up services individually:
+
+#### Step 1: Create PostgreSQL Database
+1. Click **"New +"** → **"PostgreSQL"**.
+2. Name: `skillproof-postgres`
+3. Database: `skillproof`
+4. User: `skillproof_user`
+5. Plan: `Free`
+6. Click **"Create Database"** and copy the **Internal Database URL**.
+
+#### Step 2: Create Web Service
+1. Click **"New +"** → **"Web Service"**.
+2. Connect `Blanks30/SkillProof` (Branch: `main`, Runtime: `Node`).
+3. **Build Command:** `npm install && npx prisma migrate deploy && node prisma/seed.js && npm run build`
+4. **Start Command:** `npm start`
+5. **Environment Variables:**
    - `NODE_VERSION` = `20`
-   - `DATABASE_URL` = `file:./dev.db`
+   - `DATABASE_URL` = *(Paste the Internal Database URL from Step 1)*
    - `NEXTAUTH_SECRET` = `skillproof-super-secure-production-ready-jwt-secret-key-32chars`
    - `NEXT_PUBLIC_CHAIN_ID` = `80002`
    - `NEXT_PUBLIC_NETWORK_NAME` = `Polygon Amoy Testnet`
@@ -101,11 +109,11 @@ This repository includes a [`render.yaml`](./render.yaml) specification:
 
 ---
 
-## 6. Post-Deployment Verification Checklist
+## 7. Post-Deployment Smoke Test
 
-Once Render reports **"Live"**:
-- [ ] Visit `https://<your-service>.onrender.com` — verify the Obsidian Ember 3D hero scene renders smoothly.
-- [ ] Test the Public Verification sandbox at `/verify` using `SKP-2024-98421`.
-- [ ] Navigate to `/dashboard` to confirm Student credential views.
-- [ ] Navigate to `/issuer` to confirm Issuer Studio batch minting forms.
-- [ ] Inspect browser console to confirm zero WebGL or hydration errors.
+Once Render reports status **"Live"**:
+1. Open the public URL (e.g. `https://skillproof.onrender.com`).
+2. Verify the Obsidian Ember 3D hero viewport renders smoothly.
+3. Test public certificate verification at `/verify` using `SKP-2024-98421`.
+4. Test student credential viewing at `/dashboard`.
+5. Test issuer certificate minting at `/issuer`.
