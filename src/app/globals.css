@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0b0c0d;
+    color: #e3e2e2;
+    overscroll-behavior: none;
+  }
+  ::-webkit-scrollbar { display: none; }
+  * { box-sizing: border-box; }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+  }
+}
+
+/* 3D card hover glow */
+.card-ember-hover:hover {
+  box-shadow: 0 24px 48px -12px rgba(236, 106, 6, 0.16), 0 12px 24px -8px rgba(0, 0, 0, 0.8);
+  border-color: rgba(236, 106, 6, 0.35);
+}
+
+/* Float animations */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes float-stagger {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+.anim-float-1 { animation: float-slow 5s ease-in-out infinite; }
+.anim-float-2 { animation: float-stagger 6.5s ease-in-out infinite; }

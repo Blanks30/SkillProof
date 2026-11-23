@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(uuid())
+  email         String       @unique
+  name          String
+  role          String       @default("STUDENT") // ADMIN, ISSUER, STUDENT, VERIFIER
+  walletAddress String?
+  passwordHash  String?
+  avatarUrl     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  issuerProfile Issuer?
+  certificates  Certificate[] @relation("RecipientCertificates")
+}
+
+model Institution {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  website     String?
+  logoUrl     String?
+  description String?
+  isVerified  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  issuers     Issuer[]
+}
+
+model Issuer {
+  id            String        @id @default(uuid())
+  userId        String        @unique
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institutionId String
+  institution   Institution   @relation(fields: [institutionId], references: [id])
+  walletAddress String?
+  isApproved    Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  certificates  Certificate[] @relation("IssuedCertificates")
+}
+
+model Certificate {
+  id                String                 @id @default(uuid())
+  certId            String                 @unique // e.g. SKP-2024-XXXXX
+  certHash          String                 @unique // SHA-256 cryptographic hash (0x prefixed hex)
+  recipientName     String
+  recipientEmail    String?
+  recipientAddress  String?                // Optional recipient wallet
+  institutionName   String
+  courseOrSkill     String
+  projectTitle      String?
+  description       String?
+  issueDate         DateTime               @default(now())
+  certificateType   String                 @default("Course Completion") // Course Completion, Skill Badge, Project Capstone, Degree
+  pdfUrl            String?
+  ipfsCid           String?
+  qrCodeData        String?
+  blockchainTxHash  String?
+  blockNumber       Int?
+  status            String                 @default("VALID") // VALID, REVOKED
+  revocationReason  String?
+  revokedAt         DateTime?
+  revokedByAddress  String?
+  issuerId          String
+  issuer            Issuer                 @relation("IssuedCertificates", fields: [issuerId], references: [id])
+  recipientUserId   String?
+  recipientUser     User?                  @relation("RecipientCertificates", fields: [recipientUserId], references: [id])
+  createdAt         DateTime               @default(now())
+  revocationHistory CertificateRevocation?
+}
+
+model BlockchainTransaction {
+  id          String   @id @default(uuid())
+  txHash      String   @unique
+  blockNumber Int?
+  fromAddress String
+  toAddress   String
+  operation   String   // ISSUE_CERTIFICATE, REVOKE_CERTIFICATE, AUTHORIZE_ISSUER
+  certId      String?
+  status      String   @default("CONFIRMED") // CONFIRMED, PENDING, FAILED
+  gasUsed     String?
+  timestamp   DateTime @default(now())
+}
+
+model CertificateRevocation {
+  id            String      @id @default(uuid())
+  certificateId String      @unique
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  reason        String
+  revokedBy     String      // Wallet address or user ID
+  txHash        String?
+  createdAt     DateTime    @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String   // CERT_ISSUED, CERT_REVOKED, USER_LOGIN, ISSUER_APPROVED, etc.
+  performedBy String   // email or wallet address
+  details     String?  // JSON string or summary
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+}

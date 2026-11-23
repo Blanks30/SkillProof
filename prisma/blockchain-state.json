@@ -1,0 +1,53 @@
+{
+  "certificates": {
+    "SKP-2024-98421": {
+      "certId": "SKP-2024-98421",
+      "certHash": "0x3f3cdc759a1639996be426491ce2a1ec908c8ac1fb9076a7bea126190a81560d",
+      "issuerAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "recipientName": "Alex Thorne",
+      "courseOrSkill": "Full-Stack Web3 & Solidity Architecture",
+      "issueDate": 1723680000,
+      "isRevoked": false,
+      "revokedAt": 0,
+      "revocationReason": "",
+      "blockNumber": 1845210,
+      "txHash": "0x89fa9b736b69b827e283812837bc901a88df67a57c5bf7e3110294bc1763ef29"
+    },
+    "SKP-2024-41920": {
+      "certId": "SKP-2024-41920",
+      "certHash": "0xce69a583cd2bf9d1123ae31dd8df46947dd564be9348e7e2cb2a8a1f2152798e",
+      "issuerAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "recipientName": "Alex Thorne",
+      "courseOrSkill": "Zero-Knowledge Cryptography & zk-SNARKs",
+      "issueDate": 1727827200,
+      "isRevoked": false,
+      "revokedAt": 0,
+      "revocationReason": "",
+      "blockNumber": 1845295,
+      "txHash": "0x3a4b9c1d2e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b"
+    },
+    "SKP-2024-11002": {
+      "certId": "SKP-2024-11002",
+      "certHash": "0xc98e8d7acbe22432995118e67440260009060e5c1d4ad6c46739d9b375113217",
+      "issuerAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "recipientName": "Jonathan Drake",
+      "courseOrSkill": "Smart Contract Security Auditing",
+      "issueDate": 1710028800,
+      "isRevoked": true,
+      "revokedAt": 1711929600,
+      "revocationReason": "Disciplinary action: Plagiarized audit findings detected in peer submission.",
+      "blockNumber": 1845340,
+      "txHash": "0x51c7b8e9a0f123456789abcdef0123456789abcdef0123456789abcdef012345"
+    }
+  },
+  "hashes": {
+    "0x3f3cdc759a1639996be426491ce2a1ec908c8ac1fb9076a7bea126190a81560d": "SKP-2024-98421",
+    "0xce69a583cd2bf9d1123ae31dd8df46947dd564be9348e7e2cb2a8a1f2152798e": "SKP-2024-41920",
+    "0xc98e8d7acbe22432995118e67440260009060e5c1d4ad6c46739d9b375113217": "SKP-2024-11002"
+  },
+  "authorizedIssuers": {
+    "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": true,
+    "0x70997970c51812dc3a010c7d01b50e0d17dc79c8": true
+  },
+  "latestBlock": 1845350
+}
