@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Footer() {
+export function Footer() {
   return (
     <footer className="w-full bg-[#0a0a0b] border-t border-[#1b1c1c]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -29,3 +29,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default Footer;

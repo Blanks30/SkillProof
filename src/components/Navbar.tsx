@@ -10,7 +10,7 @@ const navLinks = [
   { label: "Role Portal", href: "/#roles" },
 ];
 
-export default function Navbar() {
+export function Navbar() {
   const [open, setOpen] = useState(false);
   return (
     <header className="fixed top-0 w-full z-50 bg-[#0b0c0d]/80 backdrop-blur-xl border-b border-[#232525]/60">
@@ -66,3 +66,5 @@ export default function Navbar() {
     </header>
   );
 }
+
+export default Navbar;
